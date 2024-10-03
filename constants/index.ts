@@ -56,8 +56,8 @@ export const NavLinks = [
 ];
 
 export const NavLinks2 = [
-  { href: 'https://heroes.net.pl/szukaj', key: 'Search', text: 'Szukaj' },
-  { href: 'https://imperium.heroes.net.pl/', key: 'Forum', text: 'Forum' },
+  { href: '/templates', key: 'Szablony', text: 'Szablony' },
+  { href: '/competitions', key: 'Turnieje', text: 'Turnieje' },
   { href: 'https://osada.heroes.net.pl/', key: 'Settlement', text: 'Osada' },
   { href: 'https://mapy.heroes.net.pl/', key: 'Maps', text: 'Mapy' },
   { href: 'https://h3.heroes.net.pl/', key: 'HeroesIII', text: 'Heroes III' },
