@@ -1,5 +1,4 @@
 
-import { currentUser } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
 import CompetitionCard from "@/components/CompetitionCard";
 import Pagination from "@/components/Pagination";
@@ -12,13 +11,6 @@ async function Competitions({
 }: {
   searchParams: { [key: string]: string | undefined };
 }) {
-  const user = await currentUser();
-  console.log(user)
-  if (!user) return null;
-  
-  const userInfo = await fetchUser(user.id);
-  if (!userInfo?.onboarded) redirect("/onboarding");
-
   const serverResult = await fetchCompetitions(
     searchParams.page ? +searchParams.page : 1,
     30
@@ -39,7 +31,6 @@ async function Competitions({
               <CompetitionCard
                 key={competition._id}
                 id={competition._id}
-                currentUserId={user.id}
                 title={competition.title}
                 owner={competition.owner}
                 startDate={competition.startDate}
