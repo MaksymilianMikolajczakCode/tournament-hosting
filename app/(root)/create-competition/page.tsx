@@ -1,4 +1,4 @@
-import { currentUser } from "@clerk/nextjs";
+import { currentUser } from '@clerk/nextjs/server'
 import { redirect } from "next/navigation";
 
 import PostCompetition from "@/components/forms/PostCompetition";
@@ -10,7 +10,6 @@ async function Page() {
 
   // fetch organization list created by user
   const userInfo = await fetchUser(user.id);
-  if (!userInfo?.onboarded) redirect("/onboarding");
 
   return (
     <>
