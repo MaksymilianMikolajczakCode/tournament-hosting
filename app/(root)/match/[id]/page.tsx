@@ -1,7 +1,7 @@
 import { fetchMatch} from "@/lib/actions/competition.actions";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { currentUser } from "@clerk/nextjs";
+import { currentUser } from '@clerk/nextjs/server'
 import { fetchUser } from "@/lib/actions/user.actions";
 import Image from "next/image";
 

@@ -8,6 +8,7 @@ import { formatDateString } from "@/lib/utils";
 
 interface Props {
   id: string;
+  currentUserId: string;
   title: string;
   owner: {
     username: string;
