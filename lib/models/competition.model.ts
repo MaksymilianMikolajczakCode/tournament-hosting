@@ -60,6 +60,10 @@ const competitionSchema = new Schema({
   round: [{
     type: Schema.Types.ObjectId,
     ref: "Round"
+  }],
+  division: [{
+    type: Schema.Types.ObjectId,
+    ref: "Division"
   }]
 });
 

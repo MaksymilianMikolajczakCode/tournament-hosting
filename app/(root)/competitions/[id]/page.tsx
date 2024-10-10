@@ -11,10 +11,10 @@ async function page({ params }: { params: { id: string } }) {
 
   const user = await currentUser();
   if (!user) return null;
-
+console.log(user.id)
   const userInfo = await fetchUser(user.id);
-
-  const plainUserInfo = JSON.parse(JSON.stringify(userInfo)) || ""
+  console.log(userInfo)
+  const plainUserInfo = JSON.parse(JSON.stringify(userInfo))
   const competition = await fetchCompetitionById(params.id);
   const plainCompetition = JSON.parse(JSON.stringify(competition))
   return (

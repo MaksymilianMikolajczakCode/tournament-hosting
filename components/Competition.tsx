@@ -86,8 +86,8 @@ function Competition({
   const { user } = useUser();
   const { has } = useAuth();
  
-  const canManageSettings = has({ permission: "org:mod:change" });
-  if(!canManageSettings) return null;
+  // const canManageSettings = has({ permission: "org:mod:change" });
+  // if(!canManageSettings) return null;
   
   const pathname = usePathname();
   const arrayOfIds = players.map(obj => obj._id.toString());
