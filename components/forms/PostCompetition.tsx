@@ -21,7 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
 import { CompetitionValidation } from "@/lib/validations/competition";
-import { createCompetition } from "@/lib/actions/competition.actions";
+import { createCompetition, editCompetition } from "@/lib/actions/competition.actions";
 import { Input } from "../ui/input";
 import { Select, SelectItem, SelectTrigger, SelectValue, SelectContent } from "../ui/select";
 import { Calendar } from "../ui/calendar";
@@ -31,9 +31,10 @@ import Tiptap from "../Tiptap";
 
 interface Props {
   userId: string;
+  type: string;
 }
 
-function PostCompetition({ userId }: Props) {
+function PostCompetition({ userId, type }: Props) {
   const [startDate, setStartDate] = useState<Date | undefined>(new Date())
   const router = useRouter();
   const pathname = usePathname();
@@ -72,7 +73,7 @@ function PostCompetition({ userId }: Props) {
   });
 
   const onSubmit = async (values: z.infer<typeof CompetitionValidation>) => {
-    await createCompetition({
+    if(type = "create") {await createCompetition({
       title: values.title,
       owner: userId,
       details: values.details,
@@ -82,7 +83,20 @@ function PostCompetition({ userId }: Props) {
       // type: values.type,
       image: values.image,
       path: pathname
-    });
+    })
+    if(type="edit") {await editCompetition({
+      title: values.title,
+      owner: userId,
+      details: values.details,
+      regulations: values.regulations,
+      regulationsLink: values.regulationsLink,
+      startDate: values.startDate,
+      // type: values.type,
+      image: values.image,
+      path: pathname
+    })
+
+    };}
     // console.log(title, owner, details, regulations, regulationsLink, startDate, type)
     router.push("/competitions");
   };

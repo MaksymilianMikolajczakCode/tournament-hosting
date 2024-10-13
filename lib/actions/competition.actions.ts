@@ -83,7 +83,30 @@ export async function createCompetition({ title, owner, regulationsLink, regulat
   }
 }
 
+interface Params2 {
+  title: string,
+  owner: string,
+  regulationsLink: string,
+  regulations: String,
+  details: String,
+  startDate: Date,
+  // type: String,
+  path: string,
+  image: string,
+  id: string,
+}
 
+export async function editCompetition({title, owner, details, regulations, regulationsLink, startDate, image, path, id}: Params2) {
+  connectToDB();
+  
+  try {
+    await Competition.findByIdAndUpdate(id, {
+    $push: {title, owner, details, regulations, regulationsLink, startDate, image}
+  })} catch (err) {
+    console.error("Error while editing competition:", err);
+    throw new Error("Unable to edit competition");
+  }
+}
 
 export async function JoinCompetition({userId, competitionId} : { userId : string, competitionId: string}) {
   connectToDB();

@@ -15,7 +15,7 @@ async function Page({ params }: { params: { id: string } }) {
   const result = await fetchCompetitionById(params.id);
   return (
     <>
-      <PostCompetition userId={params.id}/>
+      <PostCompetition userId={params.id} type={edit}/>
     </>
   );
 }
