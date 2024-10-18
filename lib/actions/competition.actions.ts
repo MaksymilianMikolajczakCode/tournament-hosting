@@ -106,6 +106,7 @@ export async function editCompetition({title, owner, details, regulations, regul
     console.error("Error while editing competition:", err);
     throw new Error("Unable to edit competition");
   }
+  revalidatePath(path);
 }
 
 export async function JoinCompetition({userId, competitionId} : { userId : string, competitionId: string}) {
