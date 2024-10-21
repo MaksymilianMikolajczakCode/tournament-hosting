@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { boolean } from "zod";
 
 const Schema = mongoose.Schema;
 
@@ -64,7 +65,10 @@ const competitionSchema = new Schema({
   division: [{
     type: Schema.Types.ObjectId,
     ref: "Division"
-  }]
+  }],
+  loserBracket: {
+    type: boolean
+  },
 });
 
 const Competition = mongoose.models.Competition || mongoose.model("Competition", competitionSchema);

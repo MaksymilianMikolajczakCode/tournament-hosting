@@ -311,7 +311,9 @@ export async function generateBracket(competitionId: string, startDate: Date, pa
             bestOf: 1,
             finishDate: newDate,
           });
-      
+        if competition.loserBracket {
+          <generateLoserBracket/>
+        }
           // Assuming competition is a valid reference or ID
           await Competition.findByIdAndUpdate(
             competitionId,
