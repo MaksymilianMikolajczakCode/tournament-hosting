@@ -69,6 +69,10 @@ const competitionSchema = new Schema({
   loserBracket: {
     type: boolean
   },
+  groups: [{
+    type: Schema.Types.ObjectId,
+    ref: "Group"
+  }]
 });
 
 const Competition = mongoose.models.Competition || mongoose.model("Competition", competitionSchema);
