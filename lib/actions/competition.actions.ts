@@ -127,77 +127,6 @@ export async function JoinCompetition({userId, competitionId} : { userId : strin
 }
 
 
-
-
-
-// async function fetchAllChildThreads(threadId: string): Promise<any[]> {
-//   const childThreads = await Thread.find({ parentId: threadId });
-
-//   const descendantThreads = [];
-//   for (const childThread of childThreads) {
-//     const descendants = await fetchAllChildThreads(childThread._id);
-//     descendantThreads.push(childThread, ...descendants);
-//   }
-
-//   return descendantThreads;
-// }
-
-// export async function deleteThread(id: string, path: string): Promise<void> {
-//   try {
-//     connectToDB();
-
-//     // Find the thread to be deleted (the main thread)
-//     const mainThread = await Thread.findById(id).populate("author community");
-
-//     if (!mainThread) {
-//       throw new Error("Thread not found");
-//     }
-
-//     // Fetch all child threads and their descendants recursively
-//     const descendantThreads = await fetchAllChildThreads(id);
-
-//     // Get all descendant thread IDs including the main thread ID and child thread IDs
-//     const descendantThreadIds = [
-//       id,
-//       ...descendantThreads.map((thread) => thread._id),
-//     ];
-
-//     // Extract the authorIds and communityIds to update User and Community models respectively
-//     const uniqueAuthorIds = new Set(
-//       [
-//         ...descendantThreads.map((thread) => thread.author?._id?.toString()), // Use optional chaining to handle possible undefined values
-//         mainThread.author?._id?.toString(),
-//       ].filter((id) => id !== undefined)
-//     );
-
-//     const uniqueCommunityIds = new Set(
-//       [
-//         ...descendantThreads.map((thread) => thread.community?._id?.toString()), // Use optional chaining to handle possible undefined values
-//         mainThread.community?._id?.toString(),
-//       ].filter((id) => id !== undefined)
-//     );
-
-//     // Recursively delete child threads and their descendants
-//     await Thread.deleteMany({ _id: { $in: descendantThreadIds } });
-
-//     // Update User model
-//     await User.updateMany(
-//       { _id: { $in: Array.from(uniqueAuthorIds) } },
-//       { $pull: { threads: { $in: descendantThreadIds } } }
-//     );
-
-//     // Update Community model
-//     await Community.updateMany(
-//       { _id: { $in: Array.from(uniqueCommunityIds) } },
-//       { $pull: { threads: { $in: descendantThreadIds } } }
-//     );
-
-//     revalidatePath(path);
-//   } catch (error: any) {
-//     throw new Error(`Failed to delete thread: ${error.message}`);
-//   }
-// }
-
 export async function fetchCompetitionById(competitionId: string) {
   connectToDB();
 
@@ -233,47 +162,6 @@ export async function fetchCompetitionById(competitionId: string) {
     throw new Error("Unable to fetch competition");
   }
 }
-
-// export async function addCommentToThread(
-//   threadId: string,
-//   commentText: string,
-//   userId: string,
-//   path: string
-// ) {
-//   connectToDB();
-
-//   try {
-//     // Find the original thread by its ID
-//     const originalThread = await Thread.findById(threadId);
-
-//     if (!originalThread) {
-//       throw new Error("Thread not found");
-//     }
-
-//     // Create the new comment thread
-//     const commentThread = new Thread({
-//       text: commentText,
-//       author: userId,
-//       parentId: threadId, // Set the parentId to the original thread's ID
-//     });
-
-//     // Save the comment thread to the database
-//     const savedCommentThread = await commentThread.save();
-
-//     // Add the comment thread's ID to the original thread's children array
-//     originalThread.children.push(savedCommentThread._id);
-
-//     // Save the updated original thread to the database
-//     await originalThread.save();
-
-//     revalidatePath(path);
-//   } catch (err) {
-//     console.error("Error while adding comment:", err);
-//     throw new Error("Unable to add comment");
-//   }
-// }
-
-
 
 
 export async function generateBracket(competitionId: string, startDate: Date, path: string) {
@@ -311,9 +199,6 @@ export async function generateBracket(competitionId: string, startDate: Date, pa
             bestOf: 1,
             finishDate: newDate,
           });
-        if competition.loserBracket {
-          <generateLoserBracket/>
-        }
           // Assuming competition is a valid reference or ID
           await Competition.findByIdAndUpdate(
             competitionId,
@@ -378,202 +263,24 @@ export async function generateBracket(competitionId: string, startDate: Date, pa
   }
 }
 
+export async function generateLoserBracket(competitionId: string, startDate: Date, path: string) {
+  connectToDB()
 
-// export async function generateBracket(competitionId: string, startDate: Date) {
-//   connectToDB();
+  try {
+    const competitionQuery = Competition.findById(competitionId)
+      .populate({
+        path: "players",
+        model: User,
+        select: "image username"
+      })
+    const competition = await competitionQuery.exec()
+    const  knownBrackets = [2,4,8,16,32,64,128,256,512,1024]
+    const base = knownBrackets.find(function( base: number) { return base >= competition.players.length})
 
-//   try {
-//     const competitionQuery = Competition.findById(competitionId)
-//       .populate({
-//         path: "players",
-//         model: User,
-//         select: "image username"
-//       })
-//       const competition = await competitionQuery.exec()
-//       const shuffle = (array: string[]) => { 
-//         for (let i = array.length - 1; i > 0; i--) { 
-//           const j = Math.floor(Math.random() * (i + 1)); 
-//           [array[i], array[j]] = [array[j], array[i]]; 
-//         } 
-//         return array; 
-//       }; 
-//       const shuffledPlayers = shuffle(competition.players)
-//       const  knownBrackets = [2,4,8,16,32,64,128,256,512,1024]
-//       const base = knownBrackets.find(function( base: number) { return base >= competition.players.length})
+    
+  }
 
-//       const rounds = Math.log(base)/Math.log(2)
-//       // const empty = base - competition.players.value
-//       for (let i =1; i <= rounds; i+=1) {
-//         const newDate = new Date(startDate); // Create a new date object
-//         newDate.setUTCDate(newDate.getUTCDate() + 7 * i); // Calculate the new date
-//         await Round.create({
-//           roundNumber: `1/${(base/Math.pow(2,i))}`,
-//           competition: competition,
-//           bestOf: 1,
-//           finishDate: newDate,
-//         })
-//       } 
-
-//       // if(empty>0)
-//       for (let i = 0; i < competition.players.length; i += 2) {
-//         const teamA = shuffledPlayers[i];
-//         const teamB = shuffledPlayers[i + 1];
-//         const matchNumber = (i + 2)/2
-//         const match = await Match.create({
-//           players: [teamA, teamB],
-//           matchNumber: matchNumber,
-//           roundNumber: 1,
-//           competition: competitionId,
-//           NoR1Games: base/2
-//         })
-//         // await Competition.findByIdAndUpdate(competitionId, {
-//         //   $push: { bracket: match },
-//         // });
-//         await Round.findOneAndUpdate({ competition: competitionId, roundNumber: `1/${(base)}`},{ $push: { matches: match}})
-//       }
-
-//       for (let i = 2; i <= rounds; i+=1 ) {
-//         for (let j = 1; j<= base/(2*i); j+=1) { 
-//           const previousGames = (base*(1-Math.pow(0.5,(i-1))))
-//           const matchNumber = previousGames + j
-//           const match = await Match.create({
-//             matchNumber: matchNumber,
-//             roundNumber: i,
-//             competition: competitionId,
-//             NoR1Games: base/2
-//           })
-//           // await Competition.findByIdAndUpdate(competitionId, {
-//           //   $push: { bracket: match },
-//           // });
-//           await Round.findOneAndUpdate({ competition: competitionId, roundNumber: `1/${(base/Math.pow(2,i))}`},{ $push: { matches: match}})
-//         }
-//       }
-//   } catch (err) {
-//     console.error("Error while generating competition:", err);
-//     throw new Error("Unable to generate competition");
-//   }
-// }
-
-
-
-
-
-
-
-// export async function generateRoundBracket(competitionId: string) {
-//   connectToDB();
-
-//   try {
-//     const competitionQuery = Competition.findById(competitionId)
-//       .populate({
-//         path: "players",
-//         model: User,
-//         select: "image username"
-//       })
-//       const competition = await competitionQuery.exec()
-//       const shuffle = (array: string[]) => { 
-//         for (let i = array.length - 1; i > 0; i--) { 
-//           const j = Math.floor(Math.random() * (i + 1)); 
-//           [array[i], array[j]] = [array[j], array[i]]; 
-//         } 
-//         return array; 
-//       }; 
-//       const shuffledPlayers = shuffle(competition.players)
-//       const  knownBrackets = [2,4,8,16,32,64,128,256,512,1024]
-//       const base = knownBrackets.find(function( base: number) { return base >= competition.players.length})
-
-//       const rounds = Math.log(base)/Math.log(2)
-//       // const empty = base - competition.players.value
-//       const round = 
-
-//       // if(empty>0)
-//       for (let i = 0; i < competition.players.length; i += 2) {
-//         const teamA = shuffledPlayers[i];
-//         const teamB = shuffledPlayers[i + 1];
-//         const matchNumber = (i + 2)/2
-//         const match = await Match.create({
-//           players: [teamA, teamB],
-//           matchNumber: matchNumber,
-//           roundNumber: 1,
-//           competition: competitionId,
-//           NoR1Games: base/2
-//         })
-//         round.matches.push(match) 
-//       }
-
-//       for (let i = 2; i <= rounds; i+=1 ) {
-//         const newRound = await Round.create({
-//           roundNumber: 1/(base/i),
-//           competition: competition,
-//           bestOf: 1
-//         })
-//         for (let j = 1; j<= base/(2*i); j+=1) { 
-//           const previousGames = (base*(1-Math.pow(0.5,(i-1))))
-//           const matchNumber = previousGames + j
-//           const match = await Match.create({
-//             matchNumber: matchNumber,
-//             roundNumber: i,
-//             competition: competitionId,
-//             NoR1Games: base/2
-//           })
-//           newRound.matches.push(match)
-//         }
-//       }
-//   } catch (err) {
-//     console.error("Error while generating competition:", err);
-//     throw new Error("Unable to generate competition");
-//   }
-// }
-
-// chatGPT suggestion 
-// class Match {
-//   constructor(teamA, teamB) {
-//     this.teamA = teamA;
-//     this.teamB = teamB;
-//     this.winner = null;
-//   }
-  
-//   setWinner(winner) {
-//     this.winner = winner;
-//   }
-// }
-
-// class Bracket {
-//   constructor(teams) {
-//     this.matches = [];
-//     this.initializeBracket(teams);
-//   }
-  
-//   initializeBracket(teams) {
-//     for (let i = 0; i < teams.length; i += 2) {
-//       const teamA = teams[i];
-//       const teamB = teams[i + 1];
-//       const match = new Match(teamA, teamB);
-//       this.matches.push(match);
-//     }
-//   }
-  
-//   getWinners() {
-//     return this.matches.map(match => match.winner);
-//   }
-// }
-
-// function generateBracket(teams) {
-//   const bracket = new Bracket(teams);
-//   const winners = bracket.getWinners();
-  
-//   while (winners.length > 1) {
-//     const nextBracket = new Bracket(winners);
-//     winners = nextBracket.getWinners();
-//   }
-  
-//   return winners[0];
-// }
-
-// const teams = ['Team 1', 'Team 2', 'Team 3', 'Team 4', 'Team 5', 'Team 6', 'Team 7', 'Team 8'];
-// const winner = generateBracket(teams);
-
-// console.log('Tournament Winner:', winner);
+}
 
 export async function fetchMatch(matchId: string) {
   connectToDB();
