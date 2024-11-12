@@ -239,7 +239,7 @@ export async function generateBracket(competitionId: string, startDate: Date, pa
         }
       }
       
-
+      const rounds = Math.log(base)/Math.log(2)
       for (let i = 2; i <= rounds; i+=1 ) {
         for (let j = 1; j<= base/(2*i); j+=1) { 
           const previousGames = (base*(1-Math.pow(0.5,(i-1))))
@@ -276,10 +276,46 @@ export async function generateLoserBracket(competitionId: string, startDate: Dat
     const competition = await competitionQuery.exec()
     const  knownBrackets = [2,4,8,16,32,64,128,256,512,1024]
     const base = knownBrackets.find(function( base: number) { return base >= competition.players.length})
-
+    const rounds = (Math.log2(base)*2)-2
+    for (let i = 1; i <= rounds; i += 1) {
+      const newDate = new Date(startDate);
+      newDate.setUTCDate(newDate.getUTCDate() + 7 * i);
     
+      try {
+        const round = await Round.create({
+          roundNumber: `1/${base / Math.pow(2, i)}`,
+          competition: competition, // Ensure competition is a valid reference or ID
+          bestOf: 1,
+          finishDate: newDate,
+        });
+        // Assuming competition is a valid reference or ID
+        await Competition.findByIdAndUpdate(
+          competitionId,
+          { $push: { round: round } }, // Assuming round is stored as a reference or ID
+          { new: true } // To return the updated competition document
+        );
+      } catch (error) {
+        console.error(`Error creating round: ${error}`);
+      }
+    }
+    for (let i = 1; i <= rounds; i+=1 ) {
+      for (let j = 1; j<= base/(2*i); j+=1) { 
+        const previousGames = (base*(1-Math.pow(0.5,(i-1))))
+        const matchNumber = previousGames + j
+        const match = await Match.create({
+          matchNumber: matchNumber,
+          roundNumber: i,
+          competition: competitionId,
+          NoR1Games: base/2
+        })
+        // await Competition.findByIdAndUpdate(competitionId, {
+        //   $push: { bracket: match },
+        // });
+        await Round.findOneAndUpdate({ competition: competitionId, roundNumber: `1/${(base/Math.pow(2,i))}`},{ $push: { matches: match}})
+      }
+    }
   }
-
+  catch {}
 }
 
 export async function fetchMatch(matchId: string) {
