@@ -315,7 +315,9 @@ export async function generateLoserBracket(competitionId: string, startDate: Dat
       }
     }
   }
-  catch {}
+  catch (error) {
+    console.error(`Error creating round: ${error}`);
+  }
 }
 
 export async function fetchMatch(matchId: string) {
